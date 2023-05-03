@@ -5,7 +5,7 @@ defmodule PollerDal.Users.User do
   schema "users" do
     field(:email, :string)
     field(:password_hash, :string)
-    field(:password, :string, vitual: true)
+    field(:password, :string, virtual: true)
     field(:admin, :boolean, default: false)
 
     timestamps()
@@ -14,10 +14,26 @@ defmodule PollerDal.Users.User do
   def registration_changeset(user, attrs) do
     user
     |> cast(attrs, [:email, :password])
-    |> validate_required([:email, :pasword])
+    |> validate_required([:email, :password])
     |> validate_length(:password, min: 6)
     |> down_case_email()
     |> unique_constraint(:email)
+    |> put_password_hash()
+  end
+
+  def admin_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:admin])
+  end
+
+  def put_password_hash(changeset) do
+    case changeset do
+      %Ecto.Changeset{valid?: true, changes: %{password: password}} ->
+        put_change(changeset, :password_hash, Pbkdf2.hash_pwd_salt(password))
+
+       _ ->
+         changeset
+    end
   end
 
   def down_case_email(changeset) do
