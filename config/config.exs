@@ -6,5 +6,5 @@ config :poller_dal, PollerDal.Repo,
   password: "postgres",
   hostname: "localhost"
 
-  config :poller_dal,
+config :poller_dal,
   ecto_repos: [PollerDal.Repo]
